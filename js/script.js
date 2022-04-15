@@ -5,14 +5,14 @@ const pet = document.querySelector("#pet");
 const fur = document.querySelector("#fur");
 const sfx = {
   mewl: new Howl({
-    src: ["../sounds/mewling.mp3"],
+    src: ["sounds/mewling.mp3"],
     loop: true,
     volume: 0,
     onfade: (event) => handleSoundFadeEvent(event, { sound: "mewl" }),
   }),
 
   purr: new Howl({
-    src: ["../sounds/purr.mp3"],
+    src: ["sounds/purr.mp3"],
     loop: true,
     volume: 0,
     onfade: (event) => handleSoundFadeEvent(event, { sound: "purr" }),
