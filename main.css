@@ -1,0 +1,14 @@
+#pet {
+  margin: 0;
+  min-height: 100vh;
+  cursor: pointer;
+  background-color: #222222;
+}
+
+#visualizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
