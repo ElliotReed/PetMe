@@ -3,6 +3,7 @@
   min-height: 100vh;
   cursor: pointer;
   background-color: #222222;
+  overscroll-behavior: contain;
 }
 
 #visualizer {
