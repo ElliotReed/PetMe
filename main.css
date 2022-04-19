@@ -13,3 +13,16 @@
   width: 100vw;
   height: 100vh;
 }
+
+#start {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 0.5rem 1rem;
+  font-size: 2rem;
+  color: #666;
+  background: transparent;
+  outline: none;
+  border: 0.25rem solid #333;
+  transform: translate(calc(50vw - 50%), calc(50vh - 50%));
+}

@@ -1,8 +1,10 @@
 let discontentTimeoutId;
 let discontentInterval = 10 * 1000;
 let contentmentLevel = 0; // -1 to 1 to  match volume parameters (absolute value)
+
 const pet = document.querySelector("#pet");
-const fur = document.querySelector("#fur");
+const startButton = document.querySelector("#start");
+
 const sfx = {
   mewl: new Howl({
     src: ["sounds/mewling.mp3"],
@@ -184,4 +186,10 @@ function setupListeners() {
   pet.addEventListener("mouseup", (event) => stopPetting(event));
   pet.addEventListener("touchend", (event) => stopPetting(event));
   pet.addEventListener("levelchanged", (event) => handleLevelEvent(event));
+  startButton.addEventListener("click", () => {
+    startButton.textContent = "Pet me!";
+    setTimeout(() => {
+      startButton.style.display = "none";
+    }, 1000);
+  });
 }
