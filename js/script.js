@@ -22,19 +22,30 @@ const sfx = {
 const pointerCoordinates = {
   start: { x: null, y: null, pressure: null, time: null },
   end: { x: null, y: null, pressure: null, time: null },
+  transposedEvent: null,
 
   setStart(event) {
-    this.start.x = event.clientX;
-    this.start.y = event.clientY;
-    this.start.pressure = event.pressure;
+    this._convertEvent(event);
+    this.start.x = this.transposedEvent.pageX;
+    this.start.y = this.transposedEvent.pageY;
+    this.start.pressure = this.transposedEvent.pressure;
     this.start.time = performance.now();
   },
 
   setEnd(event) {
-    this.end.x = event.clientX;
-    this.end.y = event.clientY;
-    this.end.pressure = event.pressure;
+    this._convertEvent(event);
+    this.end.x = this.transposedEvent.pageX;
+    this.end.y = this.transposedEvent.pageY;
+    this.end.pressure = this.transposedEvent.pressure;
     this.end.time = performance.now();
+  },
+
+  _convertEvent(event) {
+    if (event.touches) {
+      this.transposedEvent = event.touches[0] || event.changedTouches[0];
+    } else {
+      this.transposedEvent = event;
+    }
   },
 
   getStrokeAttributes() {
@@ -72,11 +83,9 @@ function strokePet() {
   }
 
   if (stroke.y > (petHeight * 2) / 4) {
-    console.info("long stroke");
     isMinimumTime && setContenmentLevel("up");
     !isMinimumTime && console.log("not time: ", stroke.time);
   } else if (stroke.y > petHeight / 4) {
-    console.warn("short stroke");
     isMinimumTime && setContenmentLevel("up");
     !isMinimumTime && console.log("not time: ", stroke.time);
   } else {
@@ -103,9 +112,6 @@ function handleLevelEvent(event) {
   if (contentmentLevel < 0) {
     soundSource = sfx.mewl;
   }
-
-  console.warn("after level changed!");
-  console.log("contentmentLevel: ", contentmentLevel);
 
   fadeToContentmentLevel(soundSource);
 }
@@ -139,7 +145,6 @@ function getNewLevel(operator) {
 }
 
 function setContenmentLevel(direction) {
-  console.info("setContentmentLevel");
   if (isLevelWithinBounds()) {
     if (direction === "up") {
       contentmentLevel = getNewLevel("+");
@@ -176,6 +181,7 @@ function fadeToContentmentLevel(sound) {
 
 function setupListeners() {
   pet.addEventListener("pointerdown", (event) => startPetting(event));
-  pet.addEventListener("pointerup", (event) => stopPetting(event));
+  pet.addEventListener("mouseup", (event) => stopPetting(event));
+  pet.addEventListener("touchend", (event) => stopPetting(event));
   pet.addEventListener("levelchanged", (event) => handleLevelEvent(event));
 }
