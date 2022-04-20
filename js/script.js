@@ -4,6 +4,7 @@ let contentmentLevel = 0; // -1 to 1 to  match volume parameters (absolute value
 
 const pet = document.querySelector("#pet");
 const startButton = document.querySelector("#start");
+const levelDisplay = document.querySelector("#contentmentLevel");
 
 const sfx = {
   mewl: new Howl({
@@ -81,14 +82,15 @@ function strokePet() {
   recursivelySetContentmentLevel("down");
 
   if (stroke.x > petWidth / 3) {
-    isMinimumTime && console.warn("too wide");
+    // isMinimumTime && console.warn("too wide");
   }
 
   if (stroke.y > (petHeight * 2) / 4) {
-    isMinimumTime && setContenmentLevel("up");
+    contentmentLevel <= 0 && setContentmentLevel("reset");
+    isMinimumTime && setContentmentLevel("up");
     !isMinimumTime && console.log("not time: ", stroke.time);
   } else if (stroke.y > petHeight / 4) {
-    isMinimumTime && setContenmentLevel("up");
+    isMinimumTime && setContentmentLevel("up");
     !isMinimumTime && console.log("not time: ", stroke.time);
   } else {
     console.warn("not really a stroke: ", stroke);
@@ -97,6 +99,11 @@ function strokePet() {
 
 function handleLevelEvent(event) {
   const direction = event.detail.direction;
+
+  if (direction === "reset") {
+    contentmentLevel = 0;
+    soundSource = sfx.mewl;
+  }
 
   if (contentmentLevel === 0) {
     if (direction === "down") {
@@ -115,6 +122,7 @@ function handleLevelEvent(event) {
   }
 
   fadeToContentmentLevel(soundSource);
+  levelDisplay.textContent = contentmentLevel * 10;
 }
 
 function handleSoundFadeEvent(event, options = {}) {
@@ -145,7 +153,7 @@ function getNewLevel(operator) {
   return Math.round(rawLevel * 10) / 10;
 }
 
-function setContenmentLevel(direction) {
+function setContentmentLevel(direction) {
   if (isLevelWithinBounds()) {
     if (direction === "up") {
       contentmentLevel = getNewLevel("+");
@@ -165,7 +173,7 @@ function setContenmentLevel(direction) {
 
 function recursivelySetContentmentLevel(direction) {
   discontentTimeoutId = setTimeout(() => {
-    if (!setContenmentLevel(direction)) {
+    if (!setContentmentLevel(direction)) {
       clearTimeout(discontentTimeoutId);
       return;
     }

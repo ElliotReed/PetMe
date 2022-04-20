@@ -24,5 +24,29 @@
   background: transparent;
   outline: none;
   border: 0.25rem solid #333;
+  border-radius: 0.5rem;
   transform: translate(calc(50vw - 50%), calc(50vh - 50%));
+  cursor: pointer;
+}
+
+#start:hover {
+  color: #777;
+  border-color: #444;
+  box-shadow: 3px 3px 0 #00000044;
+}
+
+#start:active {
+  color: #555;
+  border-color: #222;
+  box-shadow: 3px 3px 0 #00000022;
+}
+
+#contentmentLevel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin: 0.5rem;
+  font-size: 2rem;
+  font-weight: bolder;
+  color: #666;
 }
