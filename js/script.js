@@ -96,7 +96,6 @@ function strokePet() {
 }
 
 function handleLevelEvent(event) {
-  console.log("event.detail: ", event.detail);
   const direction = event.detail.direction;
 
   if (contentmentLevel === 0) {
