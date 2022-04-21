@@ -15,7 +15,7 @@ const sfx = {
   }),
 
   purr: new Howl({
-    src: ["sounds/purr.mp3"],
+    src: ["sounds/purring.mp3"],
     loop: true,
     volume: 0,
     onfade: (event) => handleSoundFadeEvent(event, { sound: "purr" }),
