@@ -133,12 +133,6 @@ function handleSoundFadeEvent(event, options = {}) {
   }
 }
 
-function isLevelWithinBounds() {
-  const upperBound = 1;
-  const lowerBound = -1;
-  return contentmentLevel > lowerBound && contentmentLevel < upperBound;
-}
-
 function getNewLevel(operator) {
   let rawLevel;
 
@@ -169,6 +163,12 @@ function setContentmentLevel(direction) {
     return true;
   }
   return false;
+}
+
+function isLevelWithinBounds() {
+  const upperBound = 1;
+  const lowerBound = -1;
+  return contentmentLevel > lowerBound && contentmentLevel < upperBound;
 }
 
 function recursivelySetContentmentLevel(direction) {
