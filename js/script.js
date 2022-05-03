@@ -1,6 +1,5 @@
 let discontentTimeoutId;
 let discontentInterval = 10 * 1000;
-discontentInterval = 2 * 1000;
 let contentmentLevel = 0;
 
 const pet = document.querySelector("#pet");
