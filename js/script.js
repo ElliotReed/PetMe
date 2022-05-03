@@ -192,7 +192,6 @@ function setupListeners() {
     startButton.textContent = "Pet me!";
     setTimeout(() => {
       startButton.style.display = "none";
-      startButton.removeEventListener("click");
     }, 1000);
   });
 }
