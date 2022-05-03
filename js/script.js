@@ -92,7 +92,7 @@ function strokePet() {
   recursivelySetContentmentLevel("down");
 
   if (!stroke.pleasant) {
-    return setContentmentLevel("down") && setMessage("Uggh");
+    return setContentmentLevel("down") && setMessage("😬");
   }
 
   if (stroke.pleasant && stroke.pleasant != "meh") {
@@ -100,7 +100,7 @@ function strokePet() {
     setContentmentLevel("up") && setMessage("❤️");
     return;
   } else {
-    setMessage("...");
+    setMessage("😐");
   }
 }
 
@@ -184,14 +184,15 @@ function fadeToContentmentLevel(sound) {
 }
 
 function setupListeners() {
-  pet.addEventListener("mousedown", (event) => startPetting(event));
-  pet.addEventListener("mouseup", (event) => stopPetting(event));
-  pet.addEventListener("touchend", (event) => stopPetting(event));
-  pet.addEventListener("levelchanged", (event) => handleLevelEvent(event));
   startButton.addEventListener("click", () => {
+    pet.addEventListener("mousedown", (event) => startPetting(event));
+    pet.addEventListener("mouseup", (event) => stopPetting(event));
+    pet.addEventListener("touchend", (event) => stopPetting(event));
+    pet.addEventListener("levelchanged", (event) => handleLevelEvent(event));
     startButton.textContent = "Pet me!";
     setTimeout(() => {
       startButton.style.display = "none";
+      startButton.removeEventListener("click");
     }, 1000);
   });
 }
