@@ -1,10 +1,12 @@
 let discontentTimeoutId;
 let discontentInterval = 10 * 1000;
-let contentmentLevel = 0; // -1 to 1 to  match volume parameters (absolute value)
+discontentInterval = 2 * 1000;
+let contentmentLevel = 0;
 
 const pet = document.querySelector("#pet");
 const startButton = document.querySelector("#start");
-const levelDisplay = document.querySelector("#contentmentLevel");
+const levelDisplay = document.querySelector(".level");
+const message = document.querySelector("#message");
 
 const sfx = {
   mewl: new Howl({
@@ -23,15 +25,14 @@ const sfx = {
 };
 
 const pointerCoordinates = {
-  start: { x: null, y: null, pressure: null, time: null },
-  end: { x: null, y: null, pressure: null, time: null },
+  start: { x: null, y: null, time: null },
+  end: { x: null, y: null, time: null },
   transposedEvent: null,
 
   setStart(event) {
     this._convertEvent(event);
     this.start.x = this.transposedEvent.pageX;
     this.start.y = this.transposedEvent.pageY;
-    this.start.pressure = this.transposedEvent.pressure;
     this.start.time = performance.now();
   },
 
@@ -39,7 +40,6 @@ const pointerCoordinates = {
     this._convertEvent(event);
     this.end.x = this.transposedEvent.pageX;
     this.end.y = this.transposedEvent.pageY;
-    this.end.pressure = this.transposedEvent.pressure;
     this.end.time = performance.now();
   },
 
@@ -55,9 +55,20 @@ const pointerCoordinates = {
     return {
       x: Math.abs(this.start.x - this.end.x),
       y: Math.abs(this.start.y - this.end.y),
-      pleasant: this.start.y < this.end.y,
+      pleasant: this._isPleasant(),
       time: (this.end.time - this.start.time) / 1000, // converts to seconds
     };
+  },
+
+  _isPleasant() {
+    const isMinimumTime = (this.end.time - this.start.time) / 1000 > 1;
+    const absoluteX = Math.abs(this.start.x - this.end.x);
+    const y = Math.abs(this.start.y - this.end.y);
+    const isAgainstGrain = this.start.y > this.end.y;
+    if (isAgainstGrain || absoluteX > y) {
+      return false;
+    }
+    return isMinimumTime ? true : "meh";
   },
 };
 
@@ -68,33 +79,40 @@ function startPetting(event) {
 }
 
 function stopPetting(event) {
+  if (event.target === startButton) {
+    return;
+  }
   pointerCoordinates.setEnd(event);
   strokePet();
 }
 
 function strokePet() {
   const stroke = pointerCoordinates.getStrokeAttributes();
-  const petWidth = pet.clientWidth;
-  const petHeight = pet.clientHeight;
-  const isMinimumTime = stroke.time > 1;
 
   clearTimeout(discontentTimeoutId);
   recursivelySetContentmentLevel("down");
 
-  if (stroke.x > petWidth / 3) {
-    // isMinimumTime && console.warn("too wide");
+  if (!stroke.pleasant) {
+    return setContentmentLevel("down") && setMessage("Uggh");
   }
 
-  if (stroke.y > (petHeight * 2) / 4) {
+  if (stroke.pleasant && stroke.pleasant != "meh") {
     contentmentLevel <= 0 && setContentmentLevel("reset");
-    isMinimumTime && setContentmentLevel("up");
-    !isMinimumTime && console.log("not time: ", stroke.time);
-  } else if (stroke.y > petHeight / 4) {
-    isMinimumTime && setContentmentLevel("up");
-    !isMinimumTime && console.log("not time: ", stroke.time);
+    setContentmentLevel("up") && setMessage("❤️");
+    return;
   } else {
-    console.warn("not really a stroke: ", stroke);
+    setMessage("...");
   }
+}
+
+function setMessage(text) {
+  message.textContent = text;
+  message.style.left = `${pointerCoordinates.end.x}px`;
+  message.style.top = `${pointerCoordinates.end.y}px`;
+  message.classList.add("show");
+  setTimeout(() => {
+    message.classList.remove("show");
+  }, 1000);
 }
 
 function handleLevelEvent(event) {
@@ -122,7 +140,7 @@ function handleLevelEvent(event) {
   }
 
   fadeToContentmentLevel(soundSource);
-  levelDisplay.textContent = contentmentLevel * 10;
+  levelDisplay.textContent = contentmentLevel;
 }
 
 function handleSoundFadeEvent(event, options = {}) {
@@ -133,42 +151,20 @@ function handleSoundFadeEvent(event, options = {}) {
   }
 }
 
-function getNewLevel(operator) {
-  let rawLevel;
-
-  if (operator === "+") {
-    rawLevel = contentmentLevel + 0.1;
-  }
-
-  if (operator === "-") {
-    rawLevel = contentmentLevel - 0.1;
-  }
-
-  return Math.round(rawLevel * 10) / 10;
-}
-
 function setContentmentLevel(direction) {
-  if (isLevelWithinBounds()) {
-    if (direction === "up") {
-      contentmentLevel = getNewLevel("+");
-    }
-    if (direction === "down") {
-      contentmentLevel = getNewLevel("-");
-    }
-
-    const contentmentLevelChange = new CustomEvent("levelchanged", {
-      detail: { direction: direction },
-    });
-    pet.dispatchEvent(contentmentLevelChange);
-    return true;
+  if (direction === "up") {
+    contentmentLevel++;
   }
-  return false;
-}
 
-function isLevelWithinBounds() {
-  const upperBound = 1;
-  const lowerBound = -1;
-  return contentmentLevel > lowerBound && contentmentLevel < upperBound;
+  if (direction === "down") {
+    contentmentLevel--;
+  }
+
+  const contentmentLevelChange = new CustomEvent("levelchanged", {
+    detail: { direction: direction },
+  });
+  pet.dispatchEvent(contentmentLevelChange);
+  return true;
 }
 
 function recursivelySetContentmentLevel(direction) {
@@ -185,11 +181,11 @@ function fadeToContentmentLevel(sound) {
   if (!sound.playing()) {
     sound.play();
   }
-  sound.fade(sound.volume(), Math.abs(contentmentLevel), 1000);
+  sound.fade(sound.volume(), Math.abs(contentmentLevel / 10), 1000);
 }
 
 function setupListeners() {
-  pet.addEventListener("pointerdown", (event) => startPetting(event));
+  pet.addEventListener("mousedown", (event) => startPetting(event));
   pet.addEventListener("mouseup", (event) => stopPetting(event));
   pet.addEventListener("touchend", (event) => stopPetting(event));
   pet.addEventListener("levelchanged", (event) => handleLevelEvent(event));
