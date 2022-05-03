@@ -2,7 +2,7 @@
   "name": "Pet Me",
   "short_name": "Pet Me",
   "lang": "en-US",
-  "start_url": "https://elliotreed.github.io/PetMe/",
+  "start_url": "https://elliotreed.github.io/petme/",
   "display": "standalone",
   "theme_color": "#222222"
 }
