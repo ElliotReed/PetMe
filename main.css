@@ -4,6 +4,7 @@
   cursor: pointer;
   background-color: #222222;
   overscroll-behavior: contain;
+  overflow: hidden;
 }
 
 #visualizer {
@@ -45,8 +46,39 @@
   position: fixed;
   top: 0;
   right: 0;
-  margin: 0.5rem;
-  font-size: 2rem;
+  margin: 1rem;
+  font-size: 1.5rem;
   font-weight: bolder;
   color: #666;
+}
+
+#contentmentLevel span {
+  font-size: 2rem;
+  margin-left: 1rem;
+}
+
+#message {
+  position: absolute;
+  font-family: fantasy;
+  font-size: 3rem;
+  color: #888;
+  opacity: 0;
+  transition: opacity 160ms;
+}
+
+#message.show {
+  opacity: 1;
+  animation: shake 60ms alternate infinite;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(8px, 8px);
+  }
+  50% {
+    transform: translate(-8px, -8px);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
 }

@@ -24,7 +24,7 @@ function drawVisualizer() {
     const radiusY = scaledFrequency * height;
     const baseColorValue = 29;
     const peakColorValue = 76;
-    const red = scaledFrequency * index * 3.6;
+    const red = scaledFrequency * index * 3;
     const limitedRed = Math.min(Math.max(red, baseColorValue), peakColorValue);
 
     canvasContext.fillStyle = `rgba(${limitedRed}, ${baseColorValue}, ${baseColorValue}, ${opacity})`;
