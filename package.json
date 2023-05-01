@@ -1,0 +1,23 @@
+{
+  "name": "pet-me",
+  "version": "1.0.0",
+  "description": "\"A petting app\"",
+  "main": "index.html",
+  "scripts": {
+    "test:unit": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ElliotReed/petme.git"
+  },
+  "keywords": [
+    "pet"
+  ],
+  "author": "Elliot Reed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ElliotReed/petme/issues"
+  },
+  "homepage": "https://github.com/ElliotReed/petme#readme",
+  "type": "module"
+}

@@ -4,5 +4,11 @@
   "lang": "en-US",
   "start_url": "https://elliotreed.github.io/petme/",
   "display": "standalone",
-  "theme_color": "#222222"
+  "theme_color": "#222222",
+  "icons": [
+    {
+      "src": "🐈",
+      "sizes": "any"
+    }
+  ]
 }

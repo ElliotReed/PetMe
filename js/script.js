@@ -1,11 +1,19 @@
+import { pointerCoordinates } from './stroke.js';
+
 let discontentTimeoutId;
 let discontentInterval = 10 * 1000;
 let contentmentLevel = 0;
 
-const pet = document.querySelector("#pet");
-const startButton = document.querySelector("#start");
 const levelDisplay = document.querySelector(".level");
 const message = document.querySelector("#message");
+const pet = document.querySelector("#pet");
+const startButton = document.querySelector("#start");
+
+const messageText = {
+  isPleasant: "❤️",
+  isNotPleasant: "😬",
+  isNeutral: "😐"
+}
 
 const sfx = {
   mewl: new Howl({
@@ -23,88 +31,43 @@ const sfx = {
   }),
 };
 
-const pointerCoordinates = {
-  start: { x: null, y: null, time: null },
-  end: { x: null, y: null, time: null },
-  transposedEvent: null,
-
-  setStart(event) {
-    this._convertEvent(event);
-    this.start.x = this.transposedEvent.pageX;
-    this.start.y = this.transposedEvent.pageY;
-    this.start.time = performance.now();
-  },
-
-  setEnd(event) {
-    this._convertEvent(event);
-    this.end.x = this.transposedEvent.pageX;
-    this.end.y = this.transposedEvent.pageY;
-    this.end.time = performance.now();
-  },
-
-  _convertEvent(event) {
-    if (event.touches) {
-      this.transposedEvent = event.touches[0] || event.changedTouches[0];
-    } else {
-      this.transposedEvent = event;
-    }
-  },
-
-  getStrokeAttributes() {
-    return {
-      x: Math.abs(this.start.x - this.end.x),
-      y: Math.abs(this.start.y - this.end.y),
-      pleasant: this._isPleasant(),
-      time: (this.end.time - this.start.time) / 1000, // converts to seconds
-    };
-  },
-
-  _isPleasant() {
-    const isMinimumTime = (this.end.time - this.start.time) / 1000 > 1;
-    const absoluteX = Math.abs(this.start.x - this.end.x);
-    const y = Math.abs(this.start.y - this.end.y);
-    const isAgainstGrain = this.start.y > this.end.y;
-    if (isAgainstGrain || absoluteX > y) {
-      return false;
-    }
-    return isMinimumTime ? true : "meh";
-  },
-};
-
-setupListeners();
-
 function startPetting(event) {
-  if (event.target === startButton) {
-    return;
-  }
   pointerCoordinates.setStart(event);
 }
 
 function stopPetting(event) {
-  if (event.target === startButton) {
-    return;
-  }
   pointerCoordinates.setEnd(event);
   strokePet();
 }
 
 function strokePet() {
-  const stroke = pointerCoordinates.getStrokeAttributes();
+  const { isPleasant } = pointerCoordinates.getStrokeAttributes();
 
   clearTimeout(discontentTimeoutId);
   recursivelySetContentmentLevel("down");
 
-  if (!stroke.pleasant) {
-    return setContentmentLevel("down") && setMessage("😬");
+  if (isPleasant === undefined) {
+    return setMessage(messageText.isNeutral);
   }
 
-  if (stroke.pleasant && stroke.pleasant != "meh") {
-    contentmentLevel <= 0 && setContentmentLevel("reset");
-    setContentmentLevel("up") && setMessage("❤️");
-    return;
+  if (!isPleasant) {
+    setPetDiscontentment();
   } else {
-    setMessage("😐");
+    setPetContentment();
   }
+}
+
+function setPetDiscontentment() {
+  setContentmentLevel("down");
+  setMessage(messageText.isNotPleasant);
+}
+
+function setPetContentment() {
+  if (contentmentLevel <= 0) {
+    setContentmentLevel("reset");
+  }
+  setContentmentLevel("up");
+  setMessage(messageText.isPleasant);
 }
 
 function setMessage(text) {
@@ -119,6 +82,7 @@ function setMessage(text) {
 
 function handleLevelEvent(event) {
   const direction = event.detail.direction;
+  let soundSource;
 
   if (direction === "reset") {
     contentmentLevel = 0;
@@ -137,6 +101,7 @@ function handleLevelEvent(event) {
   if (contentmentLevel > 0) {
     soundSource = sfx.purr;
   }
+
   if (contentmentLevel < 0) {
     soundSource = sfx.mewl;
   }
@@ -165,6 +130,7 @@ function setContentmentLevel(direction) {
   const contentmentLevelChange = new CustomEvent("levelchanged", {
     detail: { direction: direction },
   });
+
   pet.dispatchEvent(contentmentLevelChange);
   return true;
 }
@@ -186,17 +152,36 @@ function fadeToContentmentLevel(sound) {
   sound.fade(sound.volume(), Math.abs(contentmentLevel / 10), 1000);
 }
 
-function setupListeners() {
-  startButton.addEventListener("click", () => {
-    pet.addEventListener("mousedown", (event) => startPetting(event));
-    pet.addEventListener("touchstart", (event) => startPetting(event));
-    pet.addEventListener("mouseup", (event) => stopPetting(event));
-    pet.addEventListener("touchend", (event) => stopPetting(event));
-    pet.addEventListener("levelchanged", (event) => handleLevelEvent(event));
-    startButton.style.pointerEvents = "none";
-    startButton.textContent = "Pet me!";
-    setTimeout(() => {
-      startButton.style.display = "none";
-    }, 1000);
-  });
+function handleStartButtonPostClick() {
+  const fadeOutDelay = 1000; // milliseconds
+  const fadeOutDuration = 500; // milliseconds
+  const startButtonText = "Pet me!";
+
+  startButton.style.pointerEvents = "none";
+  startButton.textContent = startButtonText;
+
+  setTimeout(() => {
+    startButton.animate([
+      { opacity: 1 },
+      { opacity: 0 }
+    ], {
+      duration: fadeOutDuration,
+      fill: "forwards"
+    });
+  }, fadeOutDelay);
 }
+
+function setupListeners() {
+  ["mousedown", "touchstart"].forEach(event => pet.addEventListener(event, startPetting, false));
+  ["mouseup", "touchend"].forEach(event => pet.addEventListener(event, stopPetting, false));
+  pet.addEventListener("levelchanged", event => handleLevelEvent(event), false);
+}
+
+function main() {
+  startButton.addEventListener("click", () => {
+    setupListeners();
+    handleStartButtonPostClick();
+  })
+}
+
+main();
