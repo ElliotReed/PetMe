@@ -10,9 +10,9 @@ const pet = document.querySelector("#pet");
 const startButton = document.querySelector("#start");
 
 const messageText = {
-  isPleasant: "❤️",
-  isNotPleasant: "😬",
-  isNeutral: "😐"
+  isPleasant: "😻",
+  isNotPleasant: "🙀",
+  isNeutral: "🐱"
 }
 
 const sfx = {
